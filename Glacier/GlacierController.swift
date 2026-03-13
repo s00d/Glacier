@@ -73,17 +73,19 @@ final class GlacierController {
         // ● icon button
         if let button = glacierIcon.button {
             button.target = self
-            button.action = #selector(iconClicked(_:))
+            button.action = #selector(controlClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
-        // ◆ diamond marker (non-clickable)
+        // ◆ diamond marker
         if let button = diamond.button {
             button.image = symbolImage(
                 named: Layout.diamondSymbol,
                 description: "Glacier Always Hidden Marker"
             )
-            button.cell?.isEnabled = false
+            button.target = self
+            button.action = #selector(controlClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
         sep1.button?.cell?.isEnabled = false
@@ -150,7 +152,7 @@ final class GlacierController {
 
     // MARK: - Click Handling
 
-    @objc private func iconClicked(_ sender: NSStatusBarButton) {
+    @objc private func controlClicked(_ sender: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
         if event.modifierFlags.contains(.command) { return }
         if event.type == .rightMouseUp {
@@ -195,10 +197,10 @@ final class GlacierController {
     @objc private func showUsage() {
         let paragraphs = [
             "[Always Hidden] ◆ [Hidden] ● [Visible]",
-            "Click ●\nShow / hide hidden section",
-            "Option + Click ●\nShow / hide always-hidden section",
+            "Click ● or ◆\nShow / hide hidden section",
+            "Option + Click ● or ◆\nShow / hide always-hidden section",
             "Press Esc or click below the menu bar\nHide open sections",
-            "Right-click ●\nUsage, Edit Layout, Reset Layout, Quit",
+            "Right-click ● or ◆\nUsage, Edit Layout, Reset Layout, Quit",
             "Edit Layout + Cmd + Drag ● ◆\nRearrange sections",
         ]
 

@@ -60,10 +60,10 @@ Use **Cmd + Drag** to rearrange menu bar items into three sections:
 
 | Action | Effect |
 |--------|--------|
-| **Click ●** | Show / hide the hidden section |
-| **Option + Click ●** | Show / hide the always-hidden section |
+| **Click ● or ◆** | Show / hide the hidden section |
+| **Option + Click ● or ◆** | Show / hide the always-hidden section |
 | **Click below the menu bar / Esc** | Hide the open sections |
-| **Right-click ●** | Usage / Edit Layout / Reset Layout / Quit |
+| **Right-click ● or ◆** | Usage / Edit Layout / Reset Layout / Quit |
 
 ## Current Notes
 
