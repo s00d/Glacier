@@ -86,6 +86,59 @@ Glacier 문서는 아래 세 층위로 나눈다.
 - "현재 이미 이렇게 동작한다"는 단정
 - 구현 세부 코드 분석
 
+### 4. v1 핵심기능 범위
+
+대상 문서:
+
+- [`v1-core-scope.ko.md`](/Users/fran/Workspace/Glacier/docs/v1-core-scope.ko.md)
+
+역할:
+
+- 목표 제품 중 v1에서 실제로 가져갈 범위를 고정
+- must-have와 later를 분리
+
+### 5. 행동 규칙 명세
+
+대상 문서:
+
+- [`interaction-rules.ko.md`](/Users/fran/Workspace/Glacier/docs/interaction-rules.ko.md)
+
+역할:
+
+- 입력과 상태 변화 규칙 명문화
+- 언제 접고 언제 접지 않는지 고정
+
+### 6. 상태 및 모드 설계
+
+대상 문서:
+
+- [`state-and-mode-design.ko.md`](/Users/fran/Workspace/Glacier/docs/state-and-mode-design.ko.md)
+
+역할:
+
+- `Closed / HiddenOpen / AllOpen / Editing` 상태 설계
+- 모드 분리와 시각 상태 기준 정리
+
+### 7. 리팩터링 구조안
+
+대상 문서:
+
+- [`refactor-architecture.ko.md`](/Users/fran/Workspace/Glacier/docs/refactor-architecture.ko.md)
+
+역할:
+
+- 현재 단일 컨트롤러 구조를 구현 가능한 모듈 구조로 내리기
+
+### 8. 복구 경로 및 온보딩 설계
+
+대상 문서:
+
+- [`recovery-and-onboarding.ko.md`](/Users/fran/Workspace/Glacier/docs/recovery-and-onboarding.ko.md)
+
+역할:
+
+- reset, help, first-run 안내, 안전 종료 같은 복구 축 정의
+
 ## 읽는 순서
 
 새로 합류한 사람이면 다음 순서로 읽는 것이 좋다.
@@ -93,12 +146,22 @@ Glacier 문서는 아래 세 층위로 나눈다.
 1. [`README.ko.md`](/Users/fran/Workspace/Glacier/README.ko.md) 또는 [`README.md`](/Users/fran/Workspace/Glacier/README.md)
 2. [`code-evaluation.ko.md`](/Users/fran/Workspace/Glacier/docs/code-evaluation.ko.md)
 3. [`product-behavior-prd.ko.md`](/Users/fran/Workspace/Glacier/docs/product-behavior-prd.ko.md)
+4. [`v1-core-scope.ko.md`](/Users/fran/Workspace/Glacier/docs/v1-core-scope.ko.md)
+5. [`interaction-rules.ko.md`](/Users/fran/Workspace/Glacier/docs/interaction-rules.ko.md)
+6. [`state-and-mode-design.ko.md`](/Users/fran/Workspace/Glacier/docs/state-and-mode-design.ko.md)
+7. [`refactor-architecture.ko.md`](/Users/fran/Workspace/Glacier/docs/refactor-architecture.ko.md)
+8. [`recovery-and-onboarding.ko.md`](/Users/fran/Workspace/Glacier/docs/recovery-and-onboarding.ko.md)
 
 이 순서는 각각 다음 질문에 답한다.
 
 1. 지금 이 앱은 무엇인가
 2. 지금 구현은 왜 부족한가
 3. 앞으로 어떤 제품이 되어야 하는가
+4. v1에서 무엇을 먼저 할 것인가
+5. 정확히 어떻게 반응해야 하는가
+6. 상태를 어떻게 나눌 것인가
+7. 코드를 어떻게 나눌 것인가
+8. 사용자가 길을 잃었을 때 어떻게 회복시킬 것인가
 
 ## 정합성 규칙
 
@@ -116,5 +179,10 @@ Glacier 문서 체계는 아래처럼 이해하면 된다.
 - README: 현재 배포 동작
 - 코드 평가: 현재 구현 진단
 - PRD: 목표 제품 방향
+- v1 범위: 우선순위 고정
+- 행동 규칙: 입력/반응 기준
+- 상태 설계: 상태 전이 기준
+- 구조안: 구현 분리 기준
+- 복구 설계: help/reset/onboarding 기준
 
 이 역할이 유지되면 문서 간 충돌이 크게 줄어든다.
