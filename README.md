@@ -8,7 +8,7 @@
 
 A macOS menu bar manager that hides menu bar items — in ~200 lines of Swift.
 
-[Ice](https://github.com/jordanbaird/Ice) is great, but it's 30,000+ lines with its own settings window, update framework, and accessibility layer. Glacier does the core job — hide, show, done — with zero dependencies and no accessibility permission.
+[Ice](https://github.com/jordanbaird/Ice) is great, but it's 30,000+ lines with its own settings window, update framework, and accessibility layer. Glacier is a small menu bar app focused on the core job: hide, show, done.
 
 > This README describes the repository's current shipping behavior.
 > For an implementation review, see [the Korean code evaluation](docs/code-evaluation.ko.md). For the target product direction, see [the Korean product behavior PRD](docs/product-behavior-prd.ko.md). For document roles, see [the Korean document map](docs/document-map.ko.md).
@@ -19,11 +19,11 @@ A macOS menu bar manager that hides menu bar items — in ~200 lines of Swift.
 |---|---------|-----|
 | Lines of code | ~200 | 30,000+ |
 | Dependencies | 0 | Multiple |
-| Accessibility permission | No | Yes |
-| App size | < 1 MB | ~15 MB |
+| Accessibility layer | None | Included |
+| App size | A few MB | ~15 MB |
 | Sections | 3 (visible / hidden / always hidden) | 3 |
 | macOS 26 Tahoe | Works | [Known issues](https://github.com/jordanbaird/Ice/issues/867) |
-| Settings UI | None needed | Full settings window |
+| Separate settings window | None | Full settings window |
 
 ## How It Works
 
@@ -65,6 +65,11 @@ Use **Cmd + Drag** to rearrange menu bar items into three sections:
 | **Click anywhere else** | Hide everything |
 | **Right-click ●** | Usage & Quit menu |
 
+## Current Notes
+
+- The right-click menu currently includes `Usage` and `Quit Glacier`.
+- Current builds may still show a one-time Accessibility system prompt on first launch.
+
 ## Install
 
 ### Homebrew
@@ -91,7 +96,6 @@ xcodebuild -scheme Glacier -configuration Release build
 ## Requirements
 
 - macOS 15.0 (Sequoia) or later
-- No accessibility permission needed
 
 ## License
 
