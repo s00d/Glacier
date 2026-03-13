@@ -160,6 +160,13 @@ final class GlacierController {
 
     private func showContextMenu() {
         let menu = NSMenu()
+
+        let usageItem = NSMenuItem(title: "Usage", action: #selector(showUsage), keyEquivalent: "")
+        usageItem.target = self
+        menu.addItem(usageItem)
+
+        menu.addItem(.separator())
+
         menu.addItem(NSMenuItem(
             title: "Quit Glacier",
             action: #selector(NSApp.terminate(_:)),
@@ -168,6 +175,55 @@ final class GlacierController {
         if let button = glacierIcon.button {
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.maxY + 5), in: button)
         }
+    }
+
+    @objc private func showUsage() {
+        let paragraphs = [
+            "[Always Hidden] ◆ [Hidden] ● [Visible]",
+            "Click ●\nShow / hide hidden section",
+            "Option + Click ●\nShow / hide always-hidden section",
+            "Click anywhere else\nHide everything",
+            "Cmd + Drag ● ◆\nRearrange sections",
+        ]
+
+        let font = NSFont.systemFont(ofSize: 12)
+        let boldFont = NSFont.boldSystemFont(ofSize: 12)
+        let monoFont = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        let result = NSMutableAttributedString()
+
+        // Layout diagram
+        let diagram = NSAttributedString(
+            string: paragraphs[0] + "\n\n",
+            attributes: [.font: monoFont, .foregroundColor: NSColor.secondaryLabelColor]
+        )
+        result.append(diagram)
+
+        // Action items
+        for i in 1..<paragraphs.count {
+            let parts = paragraphs[i].split(separator: "\n", maxSplits: 1)
+            let action = NSAttributedString(string: String(parts[0]) + "\n", attributes: [.font: boldFont])
+            let desc = NSAttributedString(string: String(parts[1]), attributes: [.font: font, .foregroundColor: NSColor.secondaryLabelColor])
+            result.append(action)
+            result.append(desc)
+            if i < paragraphs.count - 1 {
+                result.append(NSAttributedString(string: "\n\n"))
+            }
+        }
+
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 260, height: 0))
+        textView.isEditable = false
+        textView.isSelectable = false
+        textView.drawsBackground = false
+        textView.textStorage?.setAttributedString(result)
+        textView.sizeToFit()
+
+        let alert = NSAlert()
+        alert.messageText = "Glacier Usage"
+        alert.informativeText = ""
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.accessoryView = textView
+        alert.runModal()
     }
 
     // MARK: - Event Monitors
