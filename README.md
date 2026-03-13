@@ -62,13 +62,13 @@ Use **Cmd + Drag** to rearrange menu bar items into three sections:
 |--------|--------|
 | **Click ●** | Show / hide the hidden section |
 | **Option + Click ●** | Show / hide the always-hidden section |
-| **Click anywhere else** | Hide everything |
-| **Right-click ●** | Usage & Quit menu |
+| **Click below the menu bar / Esc** | Hide the open sections |
+| **Right-click ●** | Usage / Edit Layout / Reset Layout / Quit |
 
 ## Current Notes
 
-- The right-click menu currently includes `Usage` and `Quit Glacier`.
-- Current builds may still show a one-time Accessibility system prompt on first launch.
+- `Edit Layout` keeps the layout open while you `Cmd + Drag` the markers.
+- `Reset Layout` restores the marker positions to their defaults.
 
 ## Install
 
