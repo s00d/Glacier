@@ -10,6 +10,9 @@ macOS 메뉴바 아이템을 숨겨주는 앱 — Swift ~200줄.
 
 [Ice](https://github.com/jordanbaird/Ice)는 훌륭하지만, 설정 창, 업데이트 프레임워크, 접근성 레이어까지 포함된 30,000줄 이상의 앱입니다. Glacier는 핵심 기능만 — 숨기고, 보여주고, 끝 — 의존성 없이, 접근성 권한 없이 동작합니다.
 
+> 이 README는 현재 레포의 배포 기준 동작을 설명합니다.
+> 구현 진단은 [코드 평가 문서](docs/code-evaluation.ko.md), 목표 제품 방향은 [행동 동선 PRD](docs/product-behavior-prd.ko.md), 전체 문서 역할은 [문서 맵](docs/document-map.ko.md)을 참고하세요.
+
 ## Glacier vs Ice
 
 | | Glacier | Ice |

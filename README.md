@@ -10,6 +10,9 @@ A macOS menu bar manager that hides menu bar items — in ~200 lines of Swift.
 
 [Ice](https://github.com/jordanbaird/Ice) is great, but it's 30,000+ lines with its own settings window, update framework, and accessibility layer. Glacier does the core job — hide, show, done — with zero dependencies and no accessibility permission.
 
+> This README describes the repository's current shipping behavior.
+> For an implementation review, see [the Korean code evaluation](docs/code-evaluation.ko.md). For the target product direction, see [the Korean product behavior PRD](docs/product-behavior-prd.ko.md). For document roles, see [the Korean document map](docs/document-map.ko.md).
+
 ## Glacier vs Ice
 
 | | Glacier | Ice |
