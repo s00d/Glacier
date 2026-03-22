@@ -1,41 +1,7 @@
 import AppKit
 
-private nonisolated func seedDefaultPositionsIfNeeded() {
-    let ud = UserDefaults.standard
-    if ud.object(forKey: "NSStatusItem Preferred Position GlacierIcon") == nil {
-        ud.set(0, forKey: "NSStatusItem Preferred Position GlacierIcon")
-    }
-    if ud.object(forKey: "NSStatusItem Preferred Position GlacierSep") == nil {
-        ud.set(1, forKey: "NSStatusItem Preferred Position GlacierSep")
-    }
-    if ud.object(forKey: "NSStatusItem Preferred Position GlacierDiamond") == nil {
-        ud.set(2, forKey: "NSStatusItem Preferred Position GlacierDiamond")
-    }
-    if ud.object(forKey: "NSStatusItem Preferred Position GlacierSep2") == nil {
-        ud.set(3, forKey: "NSStatusItem Preferred Position GlacierSep2")
-    }
-}
-
 @MainActor
 final class GlacierController {
-
-    // MARK: - Layout Constants
-
-    private enum Layout {
-        static let hiddenLength: CGFloat = 10_000
-        static let closedSymbol = "circle.fill"
-        static let hiddenOpenSymbol = "circle.lefthalf.filled"
-        static let allOpenSymbol = "circle.grid.3x3.fill"
-        static let editingSymbol = "slider.horizontal.3"
-        static let diamondSymbol = "diamond.fill"
-    }
-
-    private enum DefaultsKey {
-        static let iconPosition = "NSStatusItem Preferred Position GlacierIcon"
-        static let separatorPosition = "NSStatusItem Preferred Position GlacierSep"
-        static let diamondPosition = "NSStatusItem Preferred Position GlacierDiamond"
-        static let secondSeparatorPosition = "NSStatusItem Preferred Position GlacierSep2"
-    }
 
     // MARK: - State
 
@@ -48,15 +14,15 @@ final class GlacierController {
     private let diamond: NSStatusItem      // ◆ always-hidden boundary marker
     private let sep2: NSStatusItem         // separator just left of ◆
 
-    // MARK: - Event Monitors
+    // MARK: - Collaborators
 
-    private var globalMonitor: Any?
-    private var localMonitor: Any?
+    private let layoutController: MenuBarLayoutController
+    private let eventMonitorController = EventMonitorController()
 
     // MARK: - Init
 
     init() {
-        seedDefaultPositionsIfNeeded()
+        MenuBarLayoutController.seedDefaultPositionsIfNeeded()
 
         glacierIcon = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         glacierIcon.autosaveName = "GlacierIcon"
@@ -70,21 +36,23 @@ final class GlacierController {
         sep2 = NSStatusBar.system.statusItem(withLength: 0)
         sep2.autosaveName = "GlacierSep2"
 
+        layoutController = MenuBarLayoutController(
+            glacierIcon: glacierIcon,
+            sep1: sep1,
+            diamond: diamond,
+            sep2: sep2
+        )
+
         // ● icon button
         if let button = glacierIcon.button {
             button.target = self
-            button.action = #selector(controlClicked(_:))
+            button.action = #selector(primaryControlClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
-        // ◆ diamond marker
         if let button = diamond.button {
-            button.image = symbolImage(
-                named: Layout.diamondSymbol,
-                description: "Glacier Always Hidden Marker"
-            )
             button.target = self
-            button.action = #selector(controlClicked(_:))
+            button.action = #selector(boundaryControlClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
@@ -97,17 +65,10 @@ final class GlacierController {
     // MARK: - State Transitions
 
     private func applyCurrentState() {
-        switch stateMachine.state {
-        case .closed:
-            applyClosedLayout()
-        case .hiddenOpen:
-            applyHiddenOpenLayout()
-        case .allOpen, .editing:
-            applyFullyOpenLayout()
+        layoutController.apply(state: stateMachine.state)
+        eventMonitorController.update(for: stateMachine.state) { [weak self] input in
+            self?.handle(input)
         }
-
-        updateIconAppearance()
-        updateEventMonitors()
     }
 
     private func handle(_ input: GlacierInput) {
@@ -115,50 +76,26 @@ final class GlacierController {
         applyCurrentState()
     }
 
-    private func applyClosedLayout() {
-        let ud = UserDefaults.standard
-        let iconPos = ud.double(forKey: DefaultsKey.iconPosition)
-        let newSep1Pos = iconPos + 1
-        ud.set(newSep1Pos, forKey: DefaultsKey.separatorPosition)
-
-        // isVisible toggle forces macOS to recalculate position
-        sep1.isVisible = false
-        ud.set(newSep1Pos, forKey: DefaultsKey.separatorPosition)
-        sep1.isVisible = true
-
-        sep1.length = Layout.hiddenLength
-        sep2.length = NSStatusItem.variableLength
-    }
-
-    private func applyHiddenOpenLayout() {
-        sep1.length = NSStatusItem.variableLength
-
-        let ud = UserDefaults.standard
-        let diamondPos = ud.double(forKey: DefaultsKey.diamondPosition)
-        let newSep2Pos = diamondPos + 1
-        ud.set(newSep2Pos, forKey: DefaultsKey.secondSeparatorPosition)
-
-        sep2.isVisible = false
-        ud.set(newSep2Pos, forKey: DefaultsKey.secondSeparatorPosition)
-        sep2.isVisible = true
-
-        sep2.length = Layout.hiddenLength
-    }
-
-    private func applyFullyOpenLayout() {
-        sep1.length = NSStatusItem.variableLength
-        sep2.length = NSStatusItem.variableLength
-    }
-
     // MARK: - Click Handling
 
-    @objc private func controlClicked(_ sender: NSStatusBarButton) {
+    @objc private func primaryControlClicked(_ sender: NSStatusBarButton) {
+        handleControlClick(isBoundary: false)
+    }
+
+    @objc private func boundaryControlClicked(_ sender: NSStatusBarButton) {
+        handleControlClick(isBoundary: true)
+    }
+
+    private func handleControlClick(isBoundary: Bool) {
         guard let event = NSApp.currentEvent else { return }
+
         if event.modifierFlags.contains(.command) { return }
         if event.type == .rightMouseUp {
             showContextMenu()
         } else if event.modifierFlags.contains(.option) {
             handle(.alternateClick)
+        } else if isBoundary {
+            handle(.boundaryClick)
         } else {
             handle(.primaryClick)
         }
@@ -197,7 +134,8 @@ final class GlacierController {
     @objc private func showUsage() {
         let paragraphs = [
             "[Always Hidden] ◆ [Hidden] ● [Visible]",
-            "Click ● or ◆\nShow / hide hidden section",
+            "Click ●\nShow / hide hidden section",
+            "Click ◆ after opening hidden\nShow / hide items left of ◆",
             "Option + Click ● or ◆\nShow / hide always-hidden section",
             "Press Esc or click below the menu bar\nHide open sections",
             "Right-click ● or ◆\nUsage, Edit Layout, Reset Layout, Quit",
@@ -253,113 +191,7 @@ final class GlacierController {
     }
 
     @objc private func resetLayout() {
-        let ud = UserDefaults.standard
-        ud.set(0, forKey: DefaultsKey.iconPosition)
-        ud.set(1, forKey: DefaultsKey.separatorPosition)
-        ud.set(2, forKey: DefaultsKey.diamondPosition)
-        ud.set(3, forKey: DefaultsKey.secondSeparatorPosition)
-
-        refreshPosition(for: glacierIcon, key: DefaultsKey.iconPosition)
-        refreshPosition(for: sep1, key: DefaultsKey.separatorPosition)
-        refreshPosition(for: diamond, key: DefaultsKey.diamondPosition)
-        refreshPosition(for: sep2, key: DefaultsKey.secondSeparatorPosition)
-
+        layoutController.resetToDefaultPositions()
         handle(.finishEditing)
-    }
-
-    // MARK: - Event Monitors
-
-    private func updateEventMonitors() {
-        stopEventMonitors()
-        guard stateMachine.state != .closed else { return }
-
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { [weak self] event in
-            guard let self else { return event }
-            guard event.keyCode == 53 else { return event } // Escape
-            self.handle(.escape)
-            return nil
-        }
-
-        guard stateMachine.state != .editing else { return }
-
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) {
-            [weak self] event in
-            if event.modifierFlags.contains(.command) { return }
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                if self.shouldDismiss(forGlobalMouseEvent: event) {
-                    self.handle(.dismiss)
-                }
-            }
-        }
-    }
-
-    private func stopEventMonitors() {
-        if let globalMonitor { NSEvent.removeMonitor(globalMonitor) }
-        if let localMonitor { NSEvent.removeMonitor(localMonitor) }
-        globalMonitor = nil
-        localMonitor = nil
-    }
-
-    // MARK: - Helpers
-
-    private func refreshPosition(for item: NSStatusItem, key: String) {
-        let position = UserDefaults.standard.double(forKey: key)
-        item.isVisible = false
-        UserDefaults.standard.set(position, forKey: key)
-        item.isVisible = true
-    }
-
-    private func updateIconAppearance() {
-        guard let button = glacierIcon.button else { return }
-
-        let symbolName: String
-        let description: String
-
-        switch stateMachine.state {
-        case .closed:
-            symbolName = Layout.closedSymbol
-            description = "Glacier Closed"
-        case .hiddenOpen:
-            symbolName = Layout.hiddenOpenSymbol
-            description = "Glacier Hidden Section Open"
-        case .allOpen:
-            symbolName = Layout.allOpenSymbol
-            description = "Glacier All Sections Open"
-        case .editing:
-            symbolName = Layout.editingSymbol
-            description = "Glacier Editing Layout"
-        }
-
-        button.image = symbolImage(named: symbolName, description: description)
-        button.toolTip = description
-    }
-
-    private func symbolImage(named name: String, description: String) -> NSImage? {
-        let config = NSImage.SymbolConfiguration(pointSize: 9, weight: .regular)
-        let image = NSImage(systemSymbolName: name, accessibilityDescription: description)
-            ?? NSImage(systemSymbolName: Layout.closedSymbol, accessibilityDescription: description)
-        return image?.withSymbolConfiguration(config)
-    }
-
-    private func shouldDismiss(forGlobalMouseEvent event: NSEvent) -> Bool {
-        !isPointInMenuBar(event.locationInWindow)
-    }
-
-    private func isPointInMenuBar(_ point: NSPoint) -> Bool {
-        for screen in NSScreen.screens where screen.frame.contains(point) {
-            let menuBarHeight = screen.frame.maxY - screen.visibleFrame.maxY
-            guard menuBarHeight > 0 else { return false }
-
-            let menuBarRect = NSRect(
-                x: screen.frame.minX,
-                y: screen.frame.maxY - menuBarHeight,
-                width: screen.frame.width,
-                height: menuBarHeight
-            )
-            return menuBarRect.contains(point)
-        }
-
-        return false
     }
 }

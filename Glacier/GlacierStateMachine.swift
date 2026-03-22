@@ -7,6 +7,7 @@ enum GlacierState: Equatable {
 
 enum GlacierInput {
     case primaryClick
+    case boundaryClick
     case alternateClick
     case dismiss
     case escape
@@ -24,6 +25,15 @@ struct GlacierStateMachine {
             state = .hiddenOpen
         case (.hiddenOpen, .primaryClick), (.allOpen, .primaryClick), (.editing, .primaryClick):
             state = .closed
+
+        case (.hiddenOpen, .boundaryClick):
+            state = .allOpen
+        case (.allOpen, .boundaryClick):
+            state = .hiddenOpen
+        case (.editing, .boundaryClick):
+            state = .closed
+        case (.closed, .boundaryClick):
+            break
 
         case (.closed, .alternateClick):
             state = .allOpen

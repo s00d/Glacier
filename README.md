@@ -36,7 +36,7 @@ Glacier places invisible separator items in your menu bar. By expanding them, it
 | Marker | Role |
 |--------|------|
 | **●** | Click target — toggles hidden section |
-| **◆** | Boundary — separates "hidden" from "always hidden" |
+| **◆** | Boundary control — reveals or hides the section to its left |
 
 ## Quick Start
 
@@ -54,13 +54,14 @@ Use **Cmd + Drag** to rearrange menu bar items into three sections:
 
 - Items **right of ●** → always visible
 - Items **between ● and ◆** → hidden (toggle with click)
-- Items **left of ◆** → always hidden (toggle with Option+click)
+- Items **left of ◆** → always hidden (reveal with ◆ or Option+click)
 
 ### 2. Control visibility
 
 | Action | Effect |
 |--------|--------|
-| **Click ● or ◆** | Show / hide the hidden section |
+| **Click ●** | Show / hide the hidden section |
+| **Click ◆** | When visible, show / hide items left of ◆ |
 | **Option + Click ● or ◆** | Show / hide the always-hidden section |
 | **Click below the menu bar / Esc** | Hide the open sections |
 | **Right-click ● or ◆** | Usage / Edit Layout / Reset Layout / Quit |
