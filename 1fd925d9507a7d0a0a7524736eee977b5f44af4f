@@ -1,0 +1,23 @@
+Glacier/EventMonitorController.swift
+  2e618ba6d0fa7b33 8,10-38,44-45,47-57,68,87-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "1fd925d9507a7d0a0a7524736eee977b5f44af4f",
+  "prompts": {
+    "2e618ba6d0fa7b33": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7372269a-b5f6-45db-b6cd-f9d7e5c150dc",
+        "model": "default"
+      },
+      "human_author": "Pavel Kuzmin",
+      "messages": [],
+      "total_additions": 549,
+      "total_deletions": 72,
+      "accepted_lines": 54,
+      "overriden_lines": 2
+    }
+  }
+}
