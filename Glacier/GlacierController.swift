@@ -4,9 +4,12 @@ import ServiceManagement
 @MainActor
 final class GlacierController {
 
+    private static let sectionAutoHideDelay: TimeInterval = 60
+
     // MARK: - State
 
     private var stateMachine = GlacierStateMachine()
+    private var sectionAutoHideWorkItem: DispatchWorkItem?
 
     // MARK: - NSStatusItems
 
@@ -48,13 +51,13 @@ final class GlacierController {
         if let button = glacierIcon.button {
             button.target = self
             button.action = #selector(primaryControlClicked(_:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.sendAction(on: [.leftMouseUp, .rightMouseDown])
         }
 
         if let button = diamond.button {
             button.target = self
             button.action = #selector(boundaryControlClicked(_:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.sendAction(on: [.leftMouseUp, .rightMouseDown])
         }
 
         sep1.button?.cell?.isEnabled = false
@@ -67,9 +70,42 @@ final class GlacierController {
 
     private func applyCurrentState() {
         layoutController.apply(state: stateMachine.state)
-        eventMonitorController.update(for: stateMachine.state) { [weak self] input in
-            self?.handle(input)
+        eventMonitorController.update(
+            for: stateMachine.state,
+            onInput: { [weak self] input in
+                self?.handle(input)
+            },
+            onLayoutSyncAfterCmdDrag: { [weak self] in
+                self?.resyncLayoutAfterPossibleCmdDrag()
+            }
+        )
+        rescheduleSectionAutoHideIfNeeded()
+    }
+
+    /// After one minute in an expanded (non-editing) layout, collapse back to `.closed` like Esc.
+    private func rescheduleSectionAutoHideIfNeeded() {
+        sectionAutoHideWorkItem?.cancel()
+        sectionAutoHideWorkItem = nil
+
+        switch stateMachine.state {
+        case .hiddenOpen, .allOpen:
+            let work = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                self.sectionAutoHideWorkItem = nil
+                let s = self.stateMachine.state
+                guard s == .hiddenOpen || s == .allOpen else { return }
+                self.handle(.escape)
+            }
+            sectionAutoHideWorkItem = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.sectionAutoHideDelay, execute: work)
+        case .closed, .editing:
+            break
         }
+    }
+
+    /// After Cmd+Drag in the menu bar, macOS updates `NSStatusItem` autosave slots in UserDefaults; re-apply layout.
+    private func resyncLayoutAfterPossibleCmdDrag() {
+        layoutController.apply(state: stateMachine.state)
     }
 
     private func handle(_ input: GlacierInput) {
@@ -78,6 +114,8 @@ final class GlacierController {
     }
 
     func prepareForTermination() {
+        sectionAutoHideWorkItem?.cancel()
+        sectionAutoHideWorkItem = nil
         eventMonitorController.invalidate()
     }
 
@@ -95,7 +133,7 @@ final class GlacierController {
         guard let event = NSApp.currentEvent else { return }
 
         if event.modifierFlags.contains(.command) { return }
-        if event.type == .rightMouseUp {
+        if event.type == .rightMouseDown {
             showContextMenu(anchoredTo: sender)
         } else if event.modifierFlags.contains(.option) {
             handle(.alternateClick)
@@ -154,7 +192,14 @@ final class GlacierController {
             UsageSection(title: "Click ●", body: "Show / hide hidden section"),
             UsageSection(title: "Click ◆ after opening hidden", body: "Show / hide items left of ◆"),
             UsageSection(title: "Option + Click ● or ◆", body: "Show / hide always-hidden section"),
-            UsageSection(title: "Press Esc", body: "Hide open sections"),
+            UsageSection(
+                title: "Press Esc",
+                body: "Hide open sections when Glacier (or its open menu) has keyboard focus; otherwise use ● or wait for the one-minute timeout"
+            ),
+            UsageSection(
+                title: "One-minute timeout",
+                body: "Hidden or fully open layout collapses automatically after 60 seconds (timer resets when you switch between those two)"
+            ),
             UsageSection(title: "Right-click ● or ◆", body: "Usage, Edit Layout, Reset Layout, Launch at Login, Quit"),
             UsageSection(title: "Edit Layout + Cmd + Drag ● ◆", body: "Rearrange sections"),
         ]

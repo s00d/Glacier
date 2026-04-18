@@ -109,13 +109,17 @@ final class MenuBarLayoutController {
     private func applyClosedLayout() {
         let ud = UserDefaults.standard
         let iconPos = Self.clampedStatusPosition(ud.double(forKey: DefaultsKey.iconPosition), fallback: 0)
+        // Reserve the slot immediately after ● for sep1. After Cmd+Drag, `iconPos` from UserDefaults is fresh;
+        // `EventMonitorController` re-applies this layout so we rewrite the separator slot from the new ● index.
         let newSep1Pos = iconPos + 1
         ud.set(newSep1Pos, forKey: DefaultsKey.separatorPosition)
 
         // Toggling visibility forces macOS to recalculate the separator position.
-        sep1.isVisible = false
-        ud.set(newSep1Pos, forKey: DefaultsKey.separatorPosition)
-        sep1.isVisible = true
+        runStatusBarLayoutTransaction {
+            sep1.isVisible = false
+            ud.set(newSep1Pos, forKey: DefaultsKey.separatorPosition)
+            sep1.isVisible = true
+        }
 
         sep1.length = Layout.hiddenLength
         sep2.length = NSStatusItem.variableLength
@@ -129,9 +133,11 @@ final class MenuBarLayoutController {
         let newSep2Pos = diamondPos + 1
         ud.set(newSep2Pos, forKey: DefaultsKey.secondSeparatorPosition)
 
-        sep2.isVisible = false
-        ud.set(newSep2Pos, forKey: DefaultsKey.secondSeparatorPosition)
-        sep2.isVisible = true
+        runStatusBarLayoutTransaction {
+            sep2.isVisible = false
+            ud.set(newSep2Pos, forKey: DefaultsKey.secondSeparatorPosition)
+            sep2.isVisible = true
+        }
 
         sep2.length = Layout.hiddenLength
     }
@@ -147,9 +153,20 @@ final class MenuBarLayoutController {
         if position != raw {
             UserDefaults.standard.set(position, forKey: key)
         }
-        item.isVisible = false
-        UserDefaults.standard.set(position, forKey: key)
-        item.isVisible = true
+        runStatusBarLayoutTransaction {
+            item.isVisible = false
+            UserDefaults.standard.set(position, forKey: key)
+            item.isVisible = true
+        }
+    }
+
+    /// Batches `isVisible` toggles so AppKit can coalesce status-bar relayout where possible.
+    private func runStatusBarLayoutTransaction(_ updates: () -> Void) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0
+            context.allowsImplicitAnimation = false
+            updates()
+        }
     }
 
     private func updateIconAppearance(for state: GlacierState) {

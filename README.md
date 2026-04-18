@@ -63,7 +63,8 @@ Use **Cmd + Drag** to rearrange menu bar items into three sections:
 | **Click ●** | Show / hide the hidden section |
 | **Click ◆** | When visible, show / hide items left of ◆ |
 | **Option + Click ● or ◆** | Show / hide the always-hidden section |
-| **Esc** | Hide open sections when Glacier receives the key (usually click **●** again) |
+| **Esc** | Hide open sections when Glacier has keyboard focus (menu bar utility; otherwise click **●** or use the 60 s timeout) |
+| **60 s idle** | While **hidden** or **all-open** (not editing), sections collapse automatically; the timer resets when you switch between those two |
 | **Right-click ● or ◆** | Usage / Edit Layout / Reset Layout / Quit |
 
 ## Current Notes
