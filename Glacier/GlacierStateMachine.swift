@@ -1,15 +1,12 @@
 enum GlacierState: Equatable {
     case closed
-    case hiddenOpen
-    case allOpen
+    case open
     case editing
 }
 
 enum GlacierInput {
     case primaryClick
-    case boundaryClick
     case alternateClick
-    case dismiss
     case escape
     case enterEditing
     case finishEditing
@@ -21,30 +18,15 @@ struct GlacierStateMachine {
     @discardableResult
     mutating func handle(_ input: GlacierInput) -> GlacierState {
         switch (state, input) {
-        case (.closed, .primaryClick):
-            state = .hiddenOpen
-        case (.hiddenOpen, .primaryClick), (.allOpen, .primaryClick), (.editing, .primaryClick):
+        case (.closed, .primaryClick), (.closed, .alternateClick):
+            state = .open
+        case (.open, .primaryClick), (.open, .alternateClick):
             state = .closed
 
-        case (.hiddenOpen, .boundaryClick):
-            state = .allOpen
-        case (.allOpen, .boundaryClick):
-            state = .hiddenOpen
-        case (.editing, .boundaryClick):
-            state = .closed
-        case (.closed, .boundaryClick):
+        case (.editing, .primaryClick), (.editing, .alternateClick):
             break
 
-        case (.closed, .alternateClick):
-            state = .allOpen
-        case (.hiddenOpen, .alternateClick):
-            state = .allOpen
-        case (.allOpen, .alternateClick), (.editing, .alternateClick):
-            state = .closed
-
-        case (.editing, .dismiss):
-            break
-        case (_, .dismiss), (_, .escape), (_, .finishEditing):
+        case (_, .escape), (_, .finishEditing):
             state = .closed
 
         case (_, .enterEditing):
@@ -52,5 +34,12 @@ struct GlacierStateMachine {
         }
 
         return state
+    }
+}
+
+extension GlacierStateMachine {
+    /// Used by unit tests to seed uncommon states without simulating long click sequences.
+    mutating func setStateForTesting(_ newState: GlacierState) {
+        state = newState
     }
 }

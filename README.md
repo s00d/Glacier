@@ -6,7 +6,7 @@
 
 # Glacier
 
-A macOS menu bar manager that hides menu bar items — in ~200 lines of Swift.
+A compact macOS menu bar manager that hides menu bar items in a small Swift codebase.
 
 [Ice](https://github.com/jordanbaird/Ice) is great, but it's 30,000+ lines with its own settings window, update framework, and accessibility layer. Glacier is a small menu bar app focused on the core job: hide, show, done.
 
@@ -17,59 +17,57 @@ A macOS menu bar manager that hides menu bar items — in ~200 lines of Swift.
 
 | | Glacier | Ice |
 |---|---------|-----|
-| Lines of code | ~200 | 30,000+ |
+| Lines of code | Small (core Swift sources) | 30,000+ |
 | Dependencies | 0 | Multiple |
 | Accessibility layer | None | Included |
 | App size | A few MB | ~15 MB |
-| Sections | 3 (visible / hidden / always hidden) | 3 |
+| Sections | 2 (hidden stash / visible) + one control | 3 |
 | macOS 26 Tahoe | Works | [Known issues](https://github.com/jordanbaird/Ice/issues/867) |
 | Separate settings window | None | Full settings window |
 
 ## How It Works
 
-Glacier places invisible separator items in your menu bar. By expanding them, items to their left are pushed off-screen.
+Glacier places a compact **three-dots** control (**⋯**) and an invisible separator in your menu bar. When collapsed, the separator pushes everything to the left of **⋯** off-screen; one click expands to show **all** of those icons together. Closed: solid dark dots; expanded: compact white pill with thicker dots (black ring, white center).
 
 ```
-[Always Hidden] ◆ [Hidden] ● [Visible]
+[Hidden icons] ⋯ [Visible icons]
 ```
 
 | Marker | Role |
 |--------|------|
-| **●** | Click target — toggles hidden section |
-| **◆** | Boundary control — reveals or hides the section to its left |
+| **⋯** | Click — show or hide every icon to the left of the control |
 
 ## Quick Start
 
-After launching Glacier, you'll see a small **●** dot in your menu bar. That's your control point.
+After launching Glacier, you'll see a small **⋯** (three dots) in your menu bar. That's your control point.
 
 ### 1. Organize your menu bar
 
-Use **Cmd + Drag** to rearrange menu bar items into three sections:
+Use **Cmd + Drag** to place **⋯** and the invisible separator: everything **left of ⋯** is tucked away until you click **⋯**.
 
 ```
-[Always Hidden] ◆ [Hidden] ● [Visible]
-                ↑            ↑
-          drag this     and this
+[Hidden icons] ⋯ [Visible icons]
+                    ↑
+              drag this (and the separator)
 ```
 
-- Items **right of ●** → always visible
-- Items **between ● and ◆** → hidden (toggle with click)
-- Items **left of ◆** → always hidden (reveal with ◆ or Option+click)
+- Items **right of ⋯** → always visible in the bar
+- Items **left of ⋯** → hidden together; click **⋯** to slide them in or out
 
 ### 2. Control visibility
 
 | Action | Effect |
 |--------|--------|
-| **Click ●** | Show / hide the hidden section |
-| **Click ◆** | When visible, show / hide items left of ◆ |
-| **Option + Click ● or ◆** | Show / hide the always-hidden section |
-| **Click below the menu bar / Esc** | Hide the open sections |
-| **Right-click ● or ◆** | Usage / Edit Layout / Reset Layout / Quit |
+| **Click ⋯** | Show or hide all icons to the left of ⋯ |
+| **Option + Click ⋯** | Same as a normal click |
+| **Esc** | Collapse when Glacier has keyboard focus (menu bar utility; otherwise click **⋯** or use the 60 s timeout) |
+| **60 s idle** | While expanded (not editing), the strip collapses automatically |
+| **Right-click ⋯** | Usage / Edit Layout / Reset Layout / Quit |
 
 ## Current Notes
 
-- `Edit Layout` keeps the layout open while you `Cmd + Drag` the markers.
-- `Reset Layout` restores the marker positions to their defaults.
+- `Edit Layout` keeps the strip expanded while you `Cmd + Drag` **⋯** and the separator.
+- `Reset Layout` restores **⋯** and the separator to their default positions.
 
 ## Install
 
