@@ -1,0 +1,33 @@
+README.ko.md
+  2e618ba6d0fa7b33 24,30,33,38,42,46,49-51,54-55,61-65,69-70
+GlacierTests/GlacierStateMachineTests.swift
+  2e618ba6d0fa7b33 30,32,39,50-54
+Glacier/MenuBarLayoutController.swift
+  2e618ba6d0fa7b33 9-12,54,63-64,94-95,124,129-132,135,138-143,147-235
+README.md
+  2e618ba6d0fa7b33 24,30,33,38,42,46,49-51,54-55,61-65,69-70
+Glacier/GlacierController.swift
+  2e618ba6d0fa7b33 16-17,37,73,77,161,163-164,167,171,173-174
+Glacier/GlacierStateMachine.swift
+  2e618ba6d0fa7b33 3,21-23,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "d4393a4c4dd695ab4148d1f27c26697800473453",
+  "prompts": {
+    "2e618ba6d0fa7b33": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7372269a-b5f6-45db-b6cd-f9d7e5c150dc",
+        "model": "default"
+      },
+      "human_author": "Pavel Kuzmin",
+      "messages": [],
+      "total_additions": 345,
+      "total_deletions": 336,
+      "accepted_lines": 176,
+      "overriden_lines": 0
+    }
+  }
+}
